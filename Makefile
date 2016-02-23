@@ -1,4 +1,4 @@
-.PHONY: pretty clean
+.PHONY: pretty clean ChangeLog.md
 
 # used programs
 RE2C = re2c
@@ -9,7 +9,7 @@ all: json_unit
 
 # clean up
 clean:
-	rm -f json_unit json_benchmarks
+	rm -fr json_unit json_benchmarks fuzz fuzz-testing *.dSYM
 
 
 ##########################################################################
@@ -22,6 +22,33 @@ FLAGS = -Wall -Wextra -pedantic -Weffc++ -Wcast-align -Wcast-qual -Wctor-dtor-pr
 # build unit tests
 json_unit: test/unit.cpp src/json.hpp test/catch.hpp
 	$(CXX) -std=c++11 $(CXXFLAGS) $(FLAGS) $(CPPFLAGS) -I src -I test $< $(LDFLAGS) -o $@
+
+
+##########################################################################
+# documentation tests
+##########################################################################
+
+# compile example files and check output
+doctest:
+	make check_output -C doc
+
+
+##########################################################################
+# fuzzing
+##########################################################################
+
+# the overall fuzz testing target
+fuzz_testing:
+	rm -fr fuzz-testing
+	mkdir -p fuzz-testing fuzz-testing/testcases fuzz-testing/out
+	$(MAKE) fuzz CXX=afl-clang++
+	mv fuzz fuzz-testing
+	find test/json_tests -size -5k -name *json | xargs -I{} cp "{}" fuzz-testing/testcases
+	@echo "Execute: afl-fuzz -i fuzz-testing/testcases -o fuzz-testing/out fuzz-testing/fuzz"
+
+# the fuzzer binary
+fuzz: test/fuzz.cpp src/json.hpp
+	$(CXX) -std=c++11 $(CXXFLAGS) $(FLAGS) $(CPPFLAGS) -I src $< $(LDFLAGS) -o $@
 
 
 ##########################################################################
@@ -48,7 +75,7 @@ pretty:
 	   --indent-col1-comments --pad-oper --pad-header --align-pointer=type \
 	   --align-reference=type --add-brackets --convert-tabs --close-templates \
 	   --lineend=linux --preserve-date --suffix=none \
-	   src/json.hpp src/json.hpp.re2c test/unit.cpp benchmarks/benchmarks.cpp doc/examples/*.cpp
+	   src/json.hpp src/json.hpp.re2c test/unit.cpp test/fuzz.cpp benchmarks/benchmarks.cpp doc/examples/*.cpp
 
 
 ##########################################################################
@@ -59,3 +86,13 @@ pretty:
 json_benchmarks: benchmarks/benchmarks.cpp benchmarks/benchpress.hpp benchmarks/cxxopts.hpp src/json.hpp
 	$(CXX) -std=c++11 $(CXXFLAGS) -O3 -flto -I src -I benchmarks $< $(LDFLAGS) -o $@
 	./json_benchmarks
+
+
+##########################################################################
+# changelog
+##########################################################################
+
+ChangeLog.md:
+	github_changelog_generator -o ChangeLog.md --simple-list --release-url https://github.com/nlohmann/json/releases/tag/%s
+	gsed -i 's|https://github.com/nlohmann/json/releases/tag/HEAD|https://github.com/nlohmann/json/tree/HEAD|' ChangeLog.md
+	gsed -i '2i All notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/).' ChangeLog.md

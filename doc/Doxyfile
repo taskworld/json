@@ -5,7 +5,7 @@
 #---------------------------------------------------------------------------
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = "JSON for Modern C++"
-PROJECT_NUMBER         = 1.0.0
+PROJECT_NUMBER         = 2.0.0
 PROJECT_BRIEF          = 
 PROJECT_LOGO           =
 OUTPUT_DIRECTORY       = .
@@ -30,6 +30,7 @@ TAB_SIZE               = 4
 ALIASES                = "complexity=@par Complexity\n"
 ALIASES                += liveexample{2}="@par Example\n \1 \n @includelineno \2.cpp \n Output (play with this example @htmlinclude \2.link):\n @verbinclude \2.output \n The example code above can be translated with @verbatim g++ -std=c++11 -Isrc doc/examples/\2.cpp -o \2 @endverbatim"
 ALIASES                += requirement="@par Requirements\n"
+ALIASES                += exceptionsafety="@par Exception safety\n"
 TCL_SUBST              =
 OPTIMIZE_OUTPUT_FOR_C  = NO
 OPTIMIZE_OUTPUT_JAVA   = NO
@@ -101,7 +102,7 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 # Configuration options related to the input files
 #---------------------------------------------------------------------------
-INPUT                  = ../src/json.hpp
+INPUT                  = ../src/json.hpp index.md
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          =
 RECURSIVE              = NO
@@ -117,7 +118,7 @@ INPUT_FILTER           =
 FILTER_PATTERNS        =
 FILTER_SOURCE_FILES    = NO
 FILTER_SOURCE_PATTERNS =
-USE_MDFILE_AS_MAINPAGE =
+USE_MDFILE_AS_MAINPAGE = index.md
 #---------------------------------------------------------------------------
 # Configuration options related to source browsing
 #---------------------------------------------------------------------------
